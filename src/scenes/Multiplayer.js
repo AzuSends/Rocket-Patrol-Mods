@@ -38,7 +38,7 @@ class Multiplayer extends Phaser.Scene {
             menuConfig.fontSize = '28px'
             if (game.settings.p1score > game.settings.p2score){
                 this.add.text(game.config.width/2, game.config.height/2 + borderUISize + borderPadding, 'Player 1 Wins', menuConfig).setOrigin(0.5)
-            } else if (game.settings.p1score > game.settings.p2score){
+            } else if (game.settings.p1score < game.settings.p2score){
                 this.add.text(game.config.width/2, game.config.height/2 + borderUISize + borderPadding, 'Player 2 Wins', menuConfig ).setOrigin(0.5)
             } else {
                 this.add.text(game.config.width/2, game.config.height/2 + borderUISize + borderPadding, 'Tied Game',menuConfig  ).setOrigin(0.5)
