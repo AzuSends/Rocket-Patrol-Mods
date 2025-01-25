@@ -15,7 +15,7 @@ class Play extends Phaser.Scene {
 
         this.p1Rocket = new Rocket(this, game.config.width/2, game.config.height - borderUISize - borderPadding, 'rocket').setOrigin(0.5, 0)
 
-        this.ship01 = new Spaceship(this, game.config.width + borderUISize*6, borderUISize*4, 'spaceship', 0, 30).setOrigin(0, 0)
+        this.ship01 = new Zoomship(this, game.config.width + borderUISize*6, borderUISize*4, 'zoomship', 0, 60).setOrigin(0, 0)
         this.ship02 = new Spaceship(this, game.config.width + borderUISize*3, borderUISize*5 + borderPadding*2, 'spaceship', 0, 20).setOrigin(0,0)
         this.ship03 = new Spaceship(this, game.config.width, borderUISize*6 + borderPadding*4, 'spaceship', 0, 10).setOrigin(0,0)
 
@@ -25,6 +25,7 @@ class Play extends Phaser.Scene {
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
 
         this.p1Score = 0
+        timer = game.settings.gameTimer
 
         let scoreConfig = {
             fontFamily: 'Courier',
@@ -39,14 +40,13 @@ class Play extends Phaser.Scene {
             fixedWidth: 100
         }
         this.scoreLeft = this.add.text(borderUISize + borderPadding, borderUISize + borderPadding*2, this.p1Score, scoreConfig)
+        
+        scoreConfig.align = 'left'
+        this.timerRight = this.add.text(borderUISize * 15 + borderPadding, borderUISize + borderPadding*2, timer / 1000, scoreConfig)
 
         this.gameOver = false
         scoreConfig.fixedWidth = 0
-        this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5)
-            this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5)
-            this.gameOver = true
-        }, null, this)
+        this.makeTick()
     }
     update() {
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyRESET)) {
@@ -67,14 +67,17 @@ class Play extends Phaser.Scene {
         if(this.checkCollision(this.p1Rocket, this.ship03)) {
             this.p1Rocket.reset()
             this.shipExplode(this.ship03)
+            timer += tick
         }
         if (this.checkCollision(this.p1Rocket, this.ship02)) {
             this.p1Rocket.reset()
             this.shipExplode(this.ship02)
+            timer += tick
         }
         if (this.checkCollision(this.p1Rocket, this.ship01)) {
             this.p1Rocket.reset()
             this.shipExplode(this.ship01)
+            timer += tick
         }
 
         
@@ -106,4 +109,45 @@ class Play extends Phaser.Scene {
         this.scoreLeft.text = this.p1Score   
         this.sound.play('sfx-explosion')
       }
-  }
+
+  makeTick(){
+    let scoreConfig = {
+        fontFamily: 'Courier',
+        fontSize: '28px',
+        backgroundColor: '#F3B141',
+        color: '#843605',
+        align: 'right',
+        padding: {
+          top: 5,
+          bottom: 5,
+        },
+        fixedWidth: 0
+    }
+    this.clock = this.time.delayedCall(tick, () => {
+        timer -= tick
+        console.log(timer)
+        this.timerRight.text = timer / 1000
+        if (timer <= 0){ 
+            if (this.p1Score > highScore){
+                highScore = this.p1Score
+            }
+            if (game.settings.multiplayer){
+                if (game.settings.currentPlayer == 0){
+                    game.settings.p1score = this.p1Score
+                } else if (game.settings.currentPlayer == 1){
+                    game.settings.p2score = this.p1Score
+                }
+                game.settings.currentPlayer += 1
+                this.scene.start("multiplayerScene")
+            } else {
+                this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5)
+                this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5)
+                this.gameOver = true
+            }
+        } else {
+            this.makeTick()
+        }
+    }, null, this)
+
+  } 
+}

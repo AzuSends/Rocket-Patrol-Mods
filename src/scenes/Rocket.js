@@ -17,6 +17,12 @@ class Rocket extends Phaser.GameObjects.Sprite {
             } else if (keyRIGHT.isDown && this.x <= game.config.width - borderUISize - this.width) {
                 this.x += this.moveSpeed
             }
+        } else {
+            if(keyLEFT.isDown && this.x >= borderUISize + this.width){
+                this.x -= this.moveSpeed / 3
+            } else if (keyRIGHT.isDown && this.x <= game.config.width - borderUISize - this.width) {
+                this.x += this.moveSpeed / 3
+            }
         }
 
         if (Phaser.Input.Keyboard.JustDown(keyFIRE)) {
@@ -31,6 +37,7 @@ class Rocket extends Phaser.GameObjects.Sprite {
         if(this.y <= borderUISize * 3 + borderPadding){
             this.isFiring = false
             this.y = game.config.height - borderUISize - borderPadding
+            timer -= tick * 3
         }
     }
 
